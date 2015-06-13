@@ -6,18 +6,6 @@ suppose we've set the wd where we can find activity.csv
 ```r
 setwd('d:/git/coursera/reproducible_research/RepData_PeerAssessment1')
 data <- read.csv('activity.csv')
-```
-
-```
-## Warning in file(file, "rt"): cannot open file 'activity.csv': No such file
-## or directory
-```
-
-```
-## Error in file(file, "rt"): cannot open the connection
-```
-
-```r
 data$date <- as.Date(data$date)
 ```
 
@@ -77,9 +65,10 @@ hist(dtotal2)
 ```r
 mean2 <- mean(dtotal2)
 med2 <- median(dtotal2)
-med2 <- format(med2,nsmall = 0)
+med2 <- round(med2,0)
+mean2 <- round(mean2,0)
 ```
-The mean of total steps taken per day is 1.0766189 &times; 10<sup>4</sup>, median is 10766.19.They are NOT the same with results in the first part.
+The mean of total steps taken per day is 1.0766 &times; 10<sup>4</sup>, median is 1.0766 &times; 10<sup>4</sup>.They are NOT the same with results in the first part.
 
 - Are there differences in activity patterns between weekdays and weekends?
 
