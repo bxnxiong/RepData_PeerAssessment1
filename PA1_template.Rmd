@@ -1,25 +1,62 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+#No.1 peer assignment for Reproducible Research
 
+- Loading and preprocessing the data
+suppose we've set the wd where we can find activity.csv
+```{r load_preprocess}
+setwd('d:/git/coursera/reproducible_research')
+data <- read.csv('activity.csv')
+data$date <- as.Date(data$date)
+```
 
-## Loading and preprocessing the data
+- What is mean total number of steps taken per day?
+```{r total_nof_steps}
+dtotal <- tapply(data$steps,data$date,sum,na.rm = TRUE)
+hist(dtotal)
+mean <- mean(dtotal)
+med <- median(dtotal)
+```
+The mean of total steps taken per day is `r mean`, median is `r med`
 
+- What is the average daily activity pattern?
+```{r daily_activity_pattern}
+mean_interval <- tapply(data$steps,data$interval,mean,na.rm = TRUE)
+plot(unique(data$interval),mean_interval,type = 'l',main = 'average daily activity pattern',xlab = 'interval(minutes)',ylab = 'average steps')
+max_interval <- names(mean_interval[mean_interval == max(mean_interval)])
+```
+Among the 5-minute intervals, the `r max_interval` interval contains the maximum number of steps
 
+- Imputing missing values
+```{r missing_value}
+missing <- sum(is.na(data$steps))
+```
+The total number of missing values in the dataset is `r missing`.
 
-## What is mean total number of steps taken per day?
+The strategy I use here is to fill in missing values with the mean for that interval.
+```{r fillin_NAs}
+data2 <- data
+mean_interval2 <- tapply(data$steps,data$interval,mean,na.rm = TRUE)
+rows <- row(data2)[,1]
+for (i in rows){
+  if (is.na(data2[i,1])==TRUE){
+    data2[i,1] = mean_interval2[rownames(mean_interval2) == data[i,3]]
+  }
+}
+dtotal2 <- tapply(data2$steps,data2$date,sum,na.rm = TRUE)
+hist(dtotal2)
+mean2 <- mean(dtotal2)
+med2 <- median(dtotal2)
+med2 <- format(med2,nsmall = 0)
+```
+The mean of total steps taken per day is `r mean2`, median is `r med2`.They are NOT the same with results in the first part.
 
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+- Are there differences in activity patterns between weekdays and weekends?
+```{r weekdays}
+Sys.setlocale('LC_TIME','English')
+is_wkend <- weekdays(data2[,2])=='Saturday' | weekdays(data2[,2])=='Sunday'
+is_wkend <- factor(is_wkend,labels = c('weekday','weekend'))
+data2$weekday <- is_wkend
+library(plyr)
+d <- ddply(data2,.(interval,weekday),summarize,mean = round(mean(steps),2))
+library(ggplot2)
+qplot(interval,mean,data = d,facets = .~weekday,geom = 'line')
+```
